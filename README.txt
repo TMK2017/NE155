@@ -10,9 +10,8 @@ Purpose:
 Include purpose here...
 ====================================
 How to use:
--Unzip file in desired destination
 -Open MATLAB
--Run script "DiffuseSolver2D.m"
+-Run script "GC_Master.m"
 -Answer prompts about key parameters
 -Click "run"
 -View results
