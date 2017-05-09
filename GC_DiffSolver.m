@@ -72,39 +72,73 @@ sigma_avg = Sig_A + Sig_B + Sig_C + Sig_D;
 
 % Pad del and eps with a leading & trailing zero
 del = [0,del,0];
-eps = [0,eps,0];
+eps = [0;eps';0];
 
 % Pad D with zeros
 D_expand = zeros(n+1,m+1);
 D_expand(2:end-1,2:end-1) = D;
 
 %% Calculate A_B (bottom)
-A_B = -diag(...
-    reshape(...
-    (D_expand(1:end-1,1:end-1).*del(1:end-1) + D_expand(2:end,2:end).*del(2:end))./(2*eps(1:end-1))...
-    ,[],1));
+% Calculate aij_i,j-1
+vector_B = -reshape((D_expand(1:end-1,1:end-1).*del(1:end-1) + D_expand(2:end,1:end-1).*del(2:end))./(2*eps(1:end-1)),[],1);
 % convert inf / nan values to zero
-index = isinf(A_B) | isnan(A_B);
-A_B(index) = 0;
+index = isinf(vector_B) | isnan(vector_B);
+vector_B(index) = 0;
+
+% convert to matrix
+A_B = diag(vector_B);
+
 
 
 %% Calculate A_T (top)
-A_T = -diag(...
-    reshape(...
-    (D_expand(1:end-1,1:end-1).*del(1:end-1) + D_expand(2:end,2:end).*del(2:end))./(2*eps(1:end-1))...
-    ,[],1));
+% Calculate aij_i,j+1
+vector_T = -reshape((D_expand(1:end-1,2:end).*del(1:end-1) + D_expand(2:end,2:end).*del(2:end))./(2*eps(2:end)),[],1);
 % convert inf / nan values to zero
-index = isinf(A_T) | isnan(A_T);
-A_T(index) = 0;
+index = isinf(vector_T) | isnan(vector_T);
+vector_T(index) = 0;
 
+% convert to matrix
+A_T = diag(vector_T);
+
+
+
+%% Calculate A_L (left)
+% Calculate aij_i-1,j
+vector_L = -reshape((D_expand(1:end-1,1:end-1).*eps(1:end-1) + D_expand(1:end-1,2:end).*eps(2:end))./(2*del(1:end-1)),[],1);
+% convert inf / nan values to zero
+index = isinf(vector_L) | isnan(vector_L);
+vector_L(index) = 0;
+
+% convert to matrix
+A_L = diag(vector_L);
+
+
+%% Calculate A_R (right)
+% Calculate aij_i+1,j
+vector_R = -reshape((D_expand(2:end,1:end-1).*eps(1:end-1) + D_expand(2:end,2:end).*eps(2:end))./(2*del(2:end)),[],1);
+% convert inf / nan values to zero
+index = isinf(vector_R) | isnan(vector_R);
+vector_R(index) = 0;
+
+% convert to matrix
+A_R = diag(vector_R);
 
 
 
 %% Calculate A_C (center)
-A_C = diag(sigma_avg(:)) - A_B - A_T
-%A = A_C
-A = eye(n*m);
+A_C = diag(sigma_avg(:)) - A_B - A_T - A_L - A_R;
 
+
+%% Calculate A (combine effects from top, bottom, left, right, center)
+A = ...
+    A_C +...
+    diag(vector_R(1:end-1),1) +...
+    diag(vector_L(2:end),-1)  +...
+    diag(vector_T(1:end-m),m) +...
+    diag(vector_B(1+n:end),-n);
+
+
+%% Boundary Conditions 
 
 
 
@@ -117,8 +151,7 @@ phi = reshape(phi,[n,m]);
 
 %phi = zeros(n,m);
 %phi(:) = phi_vector;
-
-
+%S_avg./sigma_avg
 
 
 end
