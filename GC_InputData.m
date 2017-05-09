@@ -4,13 +4,14 @@ function [ Dgrid,Sgrid,sigma,x,y,flag] = GC_InputData(userx,usery,userD,userS,us
 %if one or more errors occurs, otherwise print notification of
 %successful input checking
 
+
 %% Check X 
 if isa(userx,'double')
     if isvector(userx)
-        if issorted(userx)
-            usern = length(userx)-1;
-            x = transpose(userx(:));
-        else
+        usern = length(userx)-1;
+        x = transpose(userx(:));
+        del = x(2:end) - x(1:end-1);
+        if any(del <=0) 
             flag=1;
             error('X must be sorted (ordered from X_min to X_max)')
         end
@@ -27,10 +28,10 @@ end
 %% Check Y
 if isa(usery,'double')
     if isvector(usery)
-        if issorted(usery)
-            userm = length(usery)-1;
-            y = transpose(usery(:));
-        else
+        userm = length(usery)-1;
+        y = transpose(usery(:));
+        epsil = y(2:end) - y(1:end-1);
+        if any(epsil<=0)
             flag=1;
             error('Y must be sorted (ordered from Y_min to Y_max)')
         end
@@ -59,8 +60,6 @@ else
 end
 
 
-del = x(2:end) - x(1:end-1);
-epsil = y(2:end) - y(1:end-1);
 
 
 %% Check diffusion coefficient to see if it is a constant, matrix, or function
