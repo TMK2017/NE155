@@ -86,7 +86,7 @@ index = isinf(vector_B) | isnan(vector_B);
 vector_B(index) = 0;
 
 % convert to matrix
-A_B = diag(vector_B);
+A_B = spdiags(vector_B,0,n*m,n*m);
 
 
 
@@ -98,7 +98,7 @@ index = isinf(vector_T) | isnan(vector_T);
 vector_T(index) = 0;
 
 % convert to matrix
-A_T = diag(vector_T);
+A_T = spdiags(vector_T,0,n*m,n*m);
 
 
 
@@ -110,7 +110,7 @@ index = isinf(vector_L) | isnan(vector_L);
 vector_L(index) = 0;
 
 % convert to matrix
-A_L = diag(vector_L);
+A_L = spdiags(vector_L,0,n*m,n*m);
 
 
 %% Calculate A_R (right)
@@ -121,21 +121,21 @@ index = isinf(vector_R) | isnan(vector_R);
 vector_R(index) = 0;
 
 % convert to matrix
-A_R = diag(vector_R);
-
+A_R = spdiags(vector_R,0,n*m,n*m);
 
 
 %% Calculate A_C (center)
-A_C = diag(sigma_avg(:)) - A_B - A_T - A_L - A_R;
+A_C = spdiags(sigma_avg(:),0,n*m,n*m) - A_B - A_T - A_L - A_R;
 
 
 %% Calculate A (combine effects from top, bottom, left, right, center)
+
 A = ...
     A_C +...
-    diag(vector_R(1:end-1),1) +...
-    diag(vector_L(2:end),-1)  +...
-    diag(vector_T(1:end-m),m) +...
-    diag(vector_B(1+n:end),-n);
+    spdiags(vector_R(1:end-1),-1,n*m,n*m)' +...
+    spdiags(vector_L(2:end),-1,n*m,n*m)  +...
+    spdiags(vector_T(1:end-m),-m,n*m,n*m)' +...
+    spdiags(vector_B(1+n:end),-n,n*m,n*m);
 
 
 %% Boundary Conditions 
