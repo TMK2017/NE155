@@ -3,29 +3,8 @@ function [phi] = GC_DiffSolver(x,y,D,sigma,S)
 % Calculates scalar flux
 
 
-
-
-%% "Fake" Inputs
-% Make Grids n by m...
-% i = 1,...,n-1
-% j = 1,...,m-1
-% Problem geometry
-% -a < x < a
-% -b < y < b
-% a = 5;
-% b = 1;
-% %n = 10;
-% %m = 10;
-% 
-% 
-% x = linspace(-a,a,n);
-% y = linspace(-b,b,m);
-% % Make D, S, Sigma_A, phi
-% D       = 10*ones(n-1,m-1);
-% sigma = 2*ones(n-1,m-1);
-% S       = 10*ones(n-1,m-1);
-
-n = length(x);
+%% Set n,m, epsilon and delta
+n = length(x); % in this solver n = n+1 (from math derivation) and m (from code) = m+1 (from math)
 m = length(y);
 epsil = y(2:end) - y(1:end-1);
 del = x(2:end) - x(1:end-1);
@@ -93,15 +72,7 @@ B_grid = -(D_expand(1:end-1,1:end-1).*repmat(del(1:end-1),1,m) + D_expand(2:end,
 % Boundary Conditions 
 B_grid(1,:)  = 0;   % left   (phi=0, i=0,j=0...m)
 B_grid(:,1)  = 0; % bottom (phi=0, i=0...n,j=0)
-% % % B_grid(end,:)= -D_expand(end-1,1:end-1).*del(end-1)./(2.*epsil(1:end-1));   % right  (dphi/dx=0,i=n,j=1...m-1)
-% % % B_grid(:,end)= -D_expand(end-1,2:end  ).*del(end-1)./(2.*epsil(2:end));  % top (dphi/dy=0, i=1...n-1,j=m)
-% % % 
-% % % 
-% % % % Corners
-% % % B_grid(1,1) = 0;
-% % % B_grid(n,1) = 0;
-% % % B_grid(n,m) = [];
-% % % B_grid(1,m) = [];
+
 
 % convert inf / nan values to zero
 index = isinf(B_grid) | isnan(B_grid);
